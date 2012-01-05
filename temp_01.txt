@@ -1,0 +1,558 @@
+/*
+//     create admin account at localhost MYSQL
+//     to access as root, type sudo mysql
+*/
+GRANT ALL PRIVILEGES ON *.* TO 'dchan'@'localhost' IDENTIFIED BY 'dchan_pwd' 
+WITH GRANT OPTION;
+
+mysqldump -h 64.40.99.220 -u carreviews -p carreviews > 
+dump_file_life_22Mar2007
+mysql -h localhost  -u dchan -p carreviews < dump_file
+mysql -h 10.7.0.75  -u carreviews -p carreviews < dump_file
+
+
+java -classpath 
+"/home/jason/new_projects/Rss/build/lib/mysql-connector-java-3.0.16-ga-bin.jar:./" 
+DataFeed/XMLDataExtractor ../../../RSS/test0.xml
+
+
+SELECT *, 
+REPLACE(REPLACE(Metadata,'<description>','<description><![CDATA['),'</description>',']]></description>') 
+FROM car where userid = 2833 and Metadata NOT LIKE '%CDATA%' order by carid 
+;
+
+UPDATE car
+SET Metadata = 
+REPLACE(REPLACE(Metadata,'<description>','<description><![CDATA['),'</description>',']]></description>')
+where userid = 2833 and Metadata NOT LIKE '%CDATA%'
+
+SELECT * FROM car where userid = 2833 and Metadata NOT LIKE '%CDATA%' order 
+by carid ;
+
+/*
+mysql -h 64.40.99.220 -u buysell -p -e "select 
+userid,email,firstname,lastname,createdate from buysell.user where userid IN 
+(1844,2535,2719,2833,2834,2835,2836,2892,2893,2894,2552,2895,2649,2925) 
+order by userid "  >>  dealer.txt
+
+mysql -h makeup.com -u makeupoffice -p -e "SELECT trim(BOTH ' ' FROM value) 
+as value ,count(*) FROM newmakeup.TORDERATTRIBUTE WHERE value like 
+'%campaign%' group by value"  >>  makeup_campaign_list.txt
+
+mysql -h makeup.com -u makeupoffice -p -e "SELECT TRIM(b.value) as Value 
+,SUM(a.subtotal) AS subtotal,SUM(a.shippingcost) AS 
+shippingcost,SUM(a.subtotal - a.shippingcost) AS total  FROM 
+newmakeup.TORDER a INNER JOIN newmakeup.TORDERATTRIBUTE b ON a.UID_PK = 
+b.ORDERUID  WHERE a.deleted = 0 AND b.ATTRIBUTEUID = 77 AND b.value like 
+'%campaign%' AND (a.creationdate LIKE '%2006-04%' OR a.creatIONdate LIKE 
+'%2006-03%' )  GROUP BY b.value ORDER by Value"  >>  makeup_test_rpt1.txt
+
+
+mysql -h makeup.com -u makeupoffice -p -e "SELECT c.Value, SUM(c.subtotal) 
+as SUBTOTAL, SUM(c.shippingcost) as SHIPPINGCOST FROM  (SELECT 
+TRIM(substring_index(substring_index(b.value,'campaign%3D',-1),'%26',1)) as 
+Value ,SUM(a.subtotal) AS subtotal,SUM(a.shippingcost) AS shippingcost FROM 
+newmakeup.TORDER a INNER JOIN newmakeup.TORDERATTRIBUTE b ON a.UID_PK = 
+b.ORDERUID  WHERE a.deleted = 0 AND b.ATTRIBUTEUID = 77 AND b.value like 
+'%campaign%' AND (a.creationdate LIKE '%2006-04%' OR a.creatIONdate LIKE 
+'%2006-03%' )  GROUP BY b.value ) c GROUP BY c.Value ORDER BY c.value
+"  >>  makeup_Test02_Summary.txt
+
+mysql -h makeup.com -u makeupoffice -p -e "SELECT 
+TRIM(substring_index(substring_index(b.value,'campaign%3D',-1),'%26',1)) as 
+Value ,SUM(a.subtotal) AS subtotal,SUM(a.shippingcost) AS shippingcost FROM 
+newmakeup.TORDER a INNER JOIN newmakeup.TORDERATTRIBUTE b ON a.UID_PK = 
+b.ORDERUID  WHERE a.deleted = 0 AND b.ATTRIBUTEUID = 77 AND b.value like 
+'%campaign%' AND (a.creationdate LIKE '%2006-04%' OR a.creatIONdate LIKE 
+'%2006-03%' )  GROUP BY b.value ORDER by Value"  >>  makeup_Test02_Indiv.txt
+
+
+
+*/
+
+
+
+select * from user where userid = 2836 ;
+select count(*) from car where userid = 2836 ;
+delete from car where userid = 2836 ;
+
+insert into user 
+(email,countrycode,statecode,zipcode,firstname,createdate,metadata)
+select 'sales@lenuxmotors.com', 'CA', 'BC', 'V5M4M2', 'Lenux Motor Cars', 
+now(),
+'<?xml 
+version="1.0"?><user><password>password</password><phone>604-291-6663</phone><sellerType>Dealer</sellerType></user>'
+
+
+mysql -h 64.40.99.220 -u buysell -p -e "select a.carmodelid as model_id, 
+trim(substring_index(substring_index(a.metadata,'<name>',-1 ),'</name>',1)) 
+as model_desc, a.carmodelmakeid as make_id, (select 
+trim(substring_index(substring_index(b.metadatA,'<name>',-1),'</name>',1)) 
+from buysell.carmodelmake b where b.carmodelmakeid = a.carmodelmakeid ) as 
+make_desc,( select count(*) from buysell.car c where c.carmodelid = 
+a.carmodelid and c.recordstatus = "VISIBLE" and c.SellStatus <> "SOLD" ) as 
+car_record_count FROM buysell.carmodel a    order by a.carmodelmakeid" >> 
+tmp_auto_01.txt
+
+mysql -h 64.40.99.220 -u buysell -p -e "select userid, email, firstname, 
+lastname, substring_index(substring_index(metadata, '<password>',-1) 
+,'</password',1) as password  from buysell.user a where a.countrycode = 'CA' 
+and stateCode = 'BC' and recordstatus = 'VISIBLE' order by 
+firstname,lastname" >> tmp_auto_01.txt
+
+mysql -h 64.40.99.220 -u buysell -p -e "select b.carId,b.metadata, (SELECT 
+count(*) from buysell.car d where d.metadata like '%<picture_files>%' and 
+d.carid = b.carid ) as cnt  from buysell.car b where b.carid in  (SELECT 
+c.CarId  FROM buysell.car c INNER JOIN buysell.user u ON u.UserId = c.UserId 
+AND u.RecordStatus = 'VISIBLE'  WHERE (c.SellStatus = 'ACCEPTED' OR 
+c.SellStatus='SOLD') AND c.RecordStatus = 'VISIBLE' AND  u.UserId = 2834 ) 
+order by cnt desc" >> tmp_buysell_01.txt
+
+
+
+select b.carId,b.metadata, (SELECT count(*) from car d where d.metadata like 
+'%<picture_files>%' and d.carid = b.carid ) as cnt  from car b where b.carid 
+in  (SELECT c.CarId  FROM car c INNER JOIN user u ON u.UserId = c.UserId AND 
+u.RecordStatus = 'VISIBLE'  WHERE (c.SellStatus = 'ACCEPTED' OR 
+c.SellStatus='SOLD') AND c.RecordStatus = 'VISIBLE' AND  u.UserId = 2834 ) 
+order by cnt desc;
+
+
+mysql -h 64.40.99.197 -u carreviews -p -e "Select b.article_id, 
+b.article_title,b.article_date,b.article_subtitle FROM article b INNER JOIN 
+( select a.article_title,count(*) from article a group by a.article_title 
+having count(*) > 1 ) c ON c.article_title = b.article_title order by 
+b.article_title" >> tmp_reviews_01.txt
+
+
+select 
+userid,email,firstname,lastname,substring_index(substring_index(metadata,'<password>',-1),'</password',1) 
+as password  from user where countrycode = "CA" and stateCode = "BC" and 
+recordstatus = "VISIBLE" order by firstname,lastname
+
+
+
+SELECT userid, concat(firstname,',',lastname) as name, email as login, 
+substring_index(substring_index(metadata,'<password>',-1),'</password>',1) 
+as password FROM `user` where countrycode = 'CA' and stateCode = 'BC' and 
+recordstatus = 'visible' order by firstname desc ;
+
+
+mysql -h 64.40.99.180 -u makeup -p -e "SELECT value,count(*) as 
+num_of_coupon_per_value FROM newmakeup.TORDERATTRIBUTE where ATTRIBUTEUID = 
+86 group by value order by value;" >> tmp_mu_01.txt
+
+
+
+http://cgi.ebay.com/ws/eBayISAPI.dll?ViewItem&item=230037238204
+
+<?xml version="1.0" encoding="utf-8"?><model><name>J30</name></model>
+<?xml version="1.0" encoding="utf-8"?><model><name>I35</name></model>
+
+
+SELECT A.value, (SELECT B.FIXEDPRICE FROM newmakeup.TDISCOUNT B WHERE 
+trim(B.NAME) = substring_index(A.value,'-',1)) AS fixed_price, (SELECT 
+C.PERCENTAGE  FROM newmakeup.TDISCOUNT C WHERE trim(C.NAME) = 
+substring_index(A.value,'-',1)) AS Percentage  ,count(*) as 
+num_of_coupon_per_value FROM newmakeup.TORDERATTRIBUTE  A where 
+A.ATTRIBUTEUID = 86 group by A.value order by A.value;
+
+
+SELECT A.value, (SELECT B.FIXEDPRICE FROM newmakeup.TDISCOUNT B WHERE 
+trim(B.NAME) = substring_index(A.value,'-',1)) AS fixed_price, (SELECT 
+C.PERCENTAGE  FROM newmakeup.TDISCOUNT C WHERE trim(C.NAME) = 
+substring_index(A.value,'-',1)) AS Percentage,  (select SUM(n.subtotal) from 
+TORDER n where n.uid_pk IN (select m.orderuid from TORDERATTRIBUTE m where 
+m.value=A.value)) as total_coupon,(select SUM(n.customerdiscount+n.subtotal) 
+from TORDER n where n.uid_pk IN (select m.orderuid from TORDERATTRIBUTE m 
+where m.value=A.value)) as total_sales    ,count(*) as 
+num_of_coupon_per_value FROM newmakeup.TORDERATTRIBUTE  A where 
+A.ATTRIBUTEUID = 86 group by A.value order by A.value ;
+
+/*
+mysql -h 64.40.99.180 -u makeup -p -e "SELECT A.value, (SELECT B.FIXEDPRICE 
+FROM newmakeup.TDISCOUNT B WHERE trim(B.NAME) = 
+substring_index(A.value,'-',1)) AS fixed_price, (SELECT C.PERCENTAGE  FROM 
+newmakeup.TDISCOUNT C WHERE trim(C.NAME) = substring_index(A.value,'-',1)) 
+AS Percentage,  (select SUM(n.subtotal) from TORDER n where n.uid_pk IN 
+(select m.orderuid from TORDERATTRIBUTE m where m.value=A.value)) as 
+total_coupon,(select SUM(n.customerdiscount+n.subtotal) from TORDER n where 
+n.uid_pk IN (select m.orderuid from TORDERATTRIBUTE m where 
+m.value=A.value)) as total_sales    ,count(*) as num_of_coupon_per_value 
+FROM newmakeup.TORDERATTRIBUTE  A where A.ATTRIBUTEUID = 86 group by A.value 
+order by A.value " >> tmp_mu_01.txt
+*/
+
+mysql -h makeup.com -u makeupoffice -p -e "SELECT A.value, (SELECT 
+B.FIXEDPRICE FROM newmakeup.TDISCOUNT B WHERE trim(B.NAME) = 
+substring_index(A.value,'-',1)) AS fixed_price, (SELECT C.PERCENTAGE  FROM 
+newmakeup.TDISCOUNT C WHERE trim(C.NAME) = substring_index(A.value,'-',1)) 
+AS Percentage,  (select SUM(n.subtotal) from newmakeup.TORDER n where 
+n.uid_pk IN (select m.orderuid from newmakeup.TORDERATTRIBUTE m where 
+m.value=A.value)) as total_coupon,(select SUM(n.customerdiscount+n.subtotal) 
+from newmakeup.TORDER n where n.uid_pk IN (select m.orderuid from 
+newmakeup.TORDERATTRIBUTE m where m.value=A.value)) as total_sales    
+,count(*) as num_of_coupon_per_value FROM newmakeup.TORDERATTRIBUTE  A where 
+A.ATTRIBUTEUID = 86 group by A.value order by A.value " >> tmp_mu_02.txt
+
+
+mysql -h 64.40.99.180 -u makeup -p -e "select A.manufactureruid AS Brand_ID,
+       (SELECT B.NAME FROM newmakeup.TMANUFACTURER B where B.UID_PK = 
+A.manufactureruid) AS Brand_Name ,
+       ( SELECT count(*) FROM newmakeup.TORDER E
+          WHERE E.UID_PK IN ( SELECT G.orderuid
+                                FROM newmakeup.TORDERPRODUCTVARIATION G 
+INNER JOIN newmakeup.TPRODUCT H
+                                  ON G.PRODUCTUID = H.UID_PK
+                               where H.manufactureruid = A.manufactureruid
+                                 AND H.disabled = 0 and H.deleted = 0
+                                 AND G.DELETED = 0)
+            and E.deleted = 0 and E.processed = 1 and E.creationdate like 
+'%2006-12%' ) AS sales_per_Brand_cnt ,
+       count(*) AS Active_product_Cnt
+  from newmakep.TPRODUCT A
+WHERE A.disabled = 0 and A.deleted = 0
+group by A.manufactureruid
+HAVING sales_per_Brand_cnt > 0
+order by sales_per_Brand_cnt desc ,A.manufactureruid desc" >> tmp_mu_01.txt
+
+mysql -h 64.40.99.180 -u makeup -p -e "select H.UID_PK as Item_ID,
+       H.NAME as Item_Name,
+       ( SELECT COUNT(*)
+           FROM newmakeup.TORDER E  INNER JOIN 
+newmakeup.TORDERPRODUCTVARIATION G
+             ON E.UID_PK = G.orderuid
+          WHERE G.DELETED    = 0
+            AND G.PRODUCTUID = H.UID_PK
+            AND E.deleted    = 0 AND E.processed = 1 AND E.CREATIONDATE LIKE 
+'%2006-10%'
+       ) AS Item_Sales_Cnt
+  from newmakeup.TPRODUCT H
+where H.disabled = 0 and H.deleted =0
+GROUP BY H.UID_PK
+HAVING Item_Sales_Cnt > 0
+ORDER BY H.UID_PK DESC
+" >> tmp_mu_03.txt
+
+
+
+select H.UID_PK  as Item_ID,
+       H.NAME    as Item_Name,
+       COUNT(*)  as Item_Sales_Cnt
+  FROM newmakeup.TPRODUCT H            INNER JOIN 
+newmakeup.TORDERPRODUCTVARIATION G
+    ON G.PRODUCTUID = H.UID_PK         INNER JOIN newmakeup.TORDER E
+    ON E.UID_PK     = G.orderuid
+WHERE E.deleted    = 0 AND E.processed = 1 AND E.CREATIONDATE LIKE 
+'%2006-10%'
+   AND G.DELETED    = 0
+   AND H.disabled   = 0 AND H.deleted   = 0
+GROUP BY  Item_ID
+HAVING Item_Sales_Cnt > 0
+ORDER BY  Item_Name
+LIMIT 50
+
+
+SELECT COUNT(*) as Item_Sales_Cnt
+  FROM newmakeup.TORDER E  INNER JOIN newmakeup.TORDERPRODUCTVARIATION G
+    ON E.UID_PK = G.orderuid
+WHERE G.DELETED    = 0
+  AND  G.PRODUCTUID IN ( SELECT H.UID_PK FROM newmakeup.TPRODUCT H WHERE 
+H.disabled = 0 AND H.deleted = 0 )
+  AND  E.deleted    = 0 AND E.processed = 1 AND E.CREATIONDATE LIKE 
+'%2006-10%'
+  AND  Item_Sales_Cnt > 0
+
+
+
+select H.UID_PK as Item_ID,
+       H.NAME as Item_Name,
+       ( SELECT COUNT(*)
+           FROM newmakeup.TORDER E  INNER JOIN 
+newmakeup.TORDERPRODUCTVARIATION G
+             ON E.UID_PK = G.orderuid
+          WHERE G.DELETED    = 0
+            AND G.PRODUCTUID = H.UID_PK
+            AND E.deleted    = 0 AND E.processed = 1 AND E.CREATIONDATE LIKE 
+'%2006-10%'
+       ) AS Item_Sales_Cnt
+  from newmakeup.TPRODUCT H
+where H.disabled = 0 and H.deleted =0
+GROUP BY H.UID_PK
+HAVING Item_Sales_Cnt > 0
+ORDER BY H.UID_PK DESC
+LIMIT 50
+
+
+TmpAuthorName
+
+select A.manufactureruid AS Brand_ID,
+       (SELECT B.NAME FROM TMANUFACTURER B where B.UID_PK = 
+A.manufactureruid) AS Brand_Name ,
+       ( SELECT count(*) FROM TORDER E
+          WHERE E.UID_PK IN ( SELECT G.orderuid
+                                FROM TORDERPRODUCTVARIATION G INNER JOIN 
+TPRODUCT H
+                                  ON G.PRODUCTUID = H.UID_PK
+                               where H.manufactureruid = A.manufactureruid
+                                 AND H.disabled = 0 and H.deleted = 0
+                                 AND G.DELETED = 0)
+            and E.deleted = 0 and E.processed = 1 and E.creationdate like 
+'%2006-12%' ) AS sales_per_Brand_cnt ,
+       count(*) AS Product_Cnt
+  from TPRODUCT A
+group by A.manufactureruid
+order by A.manufactureruid desc
+
+select A.manufactureruid AS Brand_ID,
+       (SELECT B.NAME FROM TMANUFACTURER B where B.UID_PK = 
+A.manufactureruid) AS Brand_Name ,
+       ( select count(*) FROM TORDER E INNER JOIN 
+TTmpAuthorNameORDERPRODUCTVARIATION G
+             ON E.UID_PK     = G.orderuid INNER JOIN TPRODUCT H
+             ON G.PRODUCTUID = H.UID_PK
+          WHERE H.manufactureruid = A.manufactureruid
+            AND H.disabled = 0 and H.deleted = 0
+            AND G.DELETED = 0
+            and E.deleted = 0 and E.processed = 1 and E.creationdate like 
+'%2006-12%' ) AS sales_per_Brand_cnt,
+       count(*) AS Product_Cnt
+  from TPRODUCT A
+group by A.manufactureruid
+HAVING sales_per_Brand_cnt > 0
+order by A.manufactureruid desc()
+
+
+
+
+select A.manufactureruid AS Brand_ID,
+       (SELECT B.NAME FROM TMANUFACTURER B where B.UID_PK = 
+A.manufactureruid) AS Brand_Name ,
+       ( select count(*) FROM TORDER E INNER JOIN TORDERPRODUCTVARIATION G
+             ON E.UID_PK     = G.orderuid INNER JOIN TPRODUCT H
+             ON G.PRODUCTUID = H.UID_PK
+          WHERE H.manufactureruid = A.manufactureruid
+            AND H.disabled = 0 and H.deleted = 0
+            AND G.DELETED = 0
+            and E.deleted = 0 and E.processed = 1 and E.creationdate like 
+'%2006-12%' ) AS sales_per_Brand_cnt,
+       count(*) AS Product_Cnt ()
+  from TPRODUCT A
+where A.disabled = 0 and A.deleted =0
+group by A.manufactureruid
+HAVING sales_per_Brand_cnt > 0
+order by A.manufactureruid desc
+
+
+UPDATE user SET metadata =  
+concat(trim(substring_index(metadata,'<phone>',1)),'<phone>800-597-7396</phone>',trim(substring_index(metadata,'</phone>',-1))) 
+  where userid = 3118 ;
+
+UPDATE datafeed SET model =  
+concat(trim(UCASE(substring(model,1,1))),trim(LCASE(substring(model,2,length(model)-1)))) 
+  where VIN = '2G4WY52M3W1438469' ;
+
+
+
+(3)()
+the SQL queries for "Number of Automobile.com Directory Listings impressions 
+and views order BY number the number DESC" will return 73404 listing, and 
+the query will limit the first 3000 as follows :
+
+select customerid as ID ,businessname AS name,showcount as 
+View_Count,showfullcount as Impression_cnt from customer where showcount <> 
+0 and showfullcount <> 0 order by showcount desc  limit 3000 ;
+
+select a.carmodelid as model_id, trim(a.metadata) as model_desc, 
+a.carmodelmakeid as make_id, (select b.metadatA from carmodelmake b where 
+b.carmodelmakeid = a.carmodelmakeid ) as make_desc,( select count(*) from 
+car c where c.carmodelid = a.carmodelid and c.recordstatus = "VISIBLE" and 
+c.SellStatus <> "SOLD" ) as car_record_count FROM carmodel a    order by 
+a.carmodelmakeid  ;
+
+
+example to recreate table with auto_increment :
+
+(1)  SELECT * INTO OUTFILE '/home/jason/new_projects/buysell/author_tmp' 
+FROM author ;
+(2) Drop table author
+(3) create table author ( author_id int(10) unsigned not null 
+auto_increment, author_email varchar(100), author_name varchar(100), primary 
+key(author_id) ) ;
+(4) LOAD DATA local INFILE '/home/jason/tmp_author.txt' INTO TABLE author
+
+
+
+mysql -h 64.40.99.197 -u carreviews -p -e "SELECT * FROM carreviews.author 
+order by author_id " >> tmp_author.txt
+
+Delete from article;
+Delete from make;
+Delete from model;
+Delete from author;
+
+LOAD DATA local INFILE 'tmp_article.txt' INTO TABLE article ;
+LOAD DATA local INFILE 'tmp_make.txt'    INTO TABLE make  ;
+LOAD DATA local INFILE 'tmp_model.txt'   INTO TABLE model  ;
+LOAD DATA local INFILE 'tmp_next_author.txt'  INTO TABLE author ;
+
+DELETE FROM article where article_id > 2250 ;
+delete from image where image_id > 20963 ;
+delete from modelyear where modelyear_id > 1316;
+DELETE from modelprice where modelprice_id >1323 ;
+
+select 
+carid,userid,metadata,substring_index(substring_index(metadata,"<unique_id>",-1),"</unique_id>",1) 
+as stock_no, 
+concat(substring_index(substring_index(metadata,"<unique_id>",-1),"</unique_id>",1),".jpg") 
+as pic_col  from car where userid = 2834 and createdate like '%2007-02-16%' 
+limit 1 ;
+
+select 
+carid,userid,metadata,substring_index(substring_index(metadata,"<unique_id>",-1),"</unique_id>",1) 
+as stock_no, 
+concat("<picture_files>",substring_index(substring_index(metadata,"<unique_id>",-1),"</unique_id>",1),".jpg</picture_files>") 
+as pic_tag, concat(substring_index(metadata, 
+"</car>",1),concat("<picture_files>", 
+substring_index(substring_index(metadata, "<unique_id>",-1), 
+"</unique_id>",1),".jpg</picture_files>"),"</car>")  from car where userid = 
+2834 and createdate like '%2007-02-16%' and carid >= 446840 and carid <= 
+446842;
+
+mainwithMetaData
+// + Mar.27.2007 - 01
+<option value="${container.item.stateCode}" <c:if 
+test="${pageInput.form.stateCode eq container.item.stateCode}"> 
+selected="yes"</c:if>> ${container.item.name}</option>
+				</c:if>
+// + Mar.27.2007 - 02
+                                    <option 
+value="${container.item.stateCode}"<c:if test="${pageInput.form.stateCode eq 
+container.item.stateCode}"> 
+selected="yes"</c:if>>${container.item.name}</option>
+				</c:if>
+
+main
+<option value="${container.item.stateCode}" <c:if 
+test="${pageInput.form.stateCode eq container.item.stateCode}"> 
+selected="yes"</c:if>> ${container.item.name}</option>
+				</c:if>
+
+<option value="${container.item.stateCode}"<c:if 
+test="${pageInput.form.stateCode eq container.item.stateCode}"> 
+selected="yes"</c:if>>${container.item.name}</option>
+				</c:if>
+
+select b.carId,b.metadata, (SELECT count(*) from car d where d.metadata like 
+'%<picture_files>%' and d.carid = b.carid ) as cnt  from car b where b.carid 
+in  (SELECT c.CarId  FROM car c INNER JOIN user u ON u.UserId = c.UserId AND 
+u.RecordStatus = 'VISIBLE'  WHERE (c.SellStatus = 'ACCEPTED' OR 
+c.SellStatus='SOLD') AND c.RecordStatus = 'VISIBLE' AND  u.UserId = 2834 ) 
+order by cnt desc;
+
+//???
+<c:set var="VarInput" value="${pageInput.form.carModelMakeId}" default="N/A" 
+/>
+<c:choose>
+<c:when test="${VarInput ne 'N/A' }">
+<option value="${container.item.carModelMakeId}" <c:if 
+test="${pageInput.form.carModelMakeId eq container.item.carModelMakeId}"> 
+selected="yes"</c:if>>${container.item.name}</option>
+</c:when>
+<c:otherwise>
+<option value="${container.item.carModelMakeId}" 
+ >${container.item.name}</option>
+</c:otherwise>
+</c:choose>
+<c:remove var="VarInput" />
+
+here we insert the new table with pictures - start !
+                                <table width="75%" border="0">
+                                  <tr>
+                                    <td colspan="3">text1</td>
+                                  </tr>
+                                  <tr>
+                                    <td>text2</td>
+                                    <td colspan="2"><div 
+align="center">p1</div></td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="3">text3</td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="2"><div 
+align="center">p2</div></td>
+                                    <td>text4</td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="3">text5</td>
+                                  </tr>
+                                </table>
+here we insert the new table with pictures - end !
+
+
+public String[] StringtoArray( String s, String sep ) {
+    // convert a String s to an Array, the elements
+    // are delimited by sep
+    StringBuffer buf = new StringBuffer(s);
+    int arraysize = 1;
+    for ( int i = 0; i < buf.length(); i++ ) {
+      if ( sep.indexOf(buf.charAt(i) ) != -1 )
+        arraysize++;
+    }
+    String [] elements  = new String [arraysize];
+    int y,z = 0;
+    if ( buf.toString().indexOf(sep) != -1 ) {
+      while (  buf.length() > 0 ) {
+        if ( buf.toString().indexOf(sep) != -1 ) {
+          y =  buf.toString().indexOf(sep);
+          if ( y != buf.toString().lastIndexOf(sep) ) {
+            elements[z] = buf.toString().substring(0, y ); z++;
+            buf.delete(0, y + 1);
+          }
+          else if ( buf.toString().lastIndexOf(sep) == y ) {
+            elements[z] = buf.toString().substring
+                                 (0, buf.toString().indexOf(sep));
+            z++;
+            buf.delete(0, buf.toString().indexOf(sep) + 1);
+            elements[z] = buf.toString();z++;
+            buf.delete(0, buf.length() );
+          }
+        }
+      }
+    }
+    else {elements[0] = buf.toString(); }
+    buf = null;
+    return elements;
+}
+// jsp - article
+    <c:forEach var="row" items="${article['article_text']}" 
+varStatus="status" >
+    <jsp:useBean id="status" 
+type="javax.servlet.jsp.jstl.core.LoopTagStatus" />
+    <c-rt:choose>
+        <c-rt:when test="<%=status.getCount()%2 == 0  %>">
+            <c:set var="color" value="#eeeeee" />
+            <tr>
+                <td colspan="3" bgcolor="<c:out value="${color}"/>">
+                    <c:out value="${row}" />
+                </td>
+            </tr>
+        </c-rt:when>
+    </c-rt:choose>
+    <c-rt:otherwise>
+            <c:set var="color" value="#dddddd" />
+            <tr>
+                <td><c:out value="${row}"/></td>
+                <td colspan="2" bgcolor="<c:out value="${color}"/>">
+                    <div align="center">picture_1</div>
+                </td>
+            </tr>
+    </c-rt:otherwise>
+
+    <c:set var="nCnt"   value="${nCnt+1}" />
+    </c:forEach>
+
+
+
+

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application
+    xmlns:mx="http://www.adobe.com/2006/mxml"
+    xmlns:pom="com.pomodo.components.*"
+    layout="vertical"
+    backgroundGradientColors="[#ffffff, #c0c0c0]"
+    horizontalAlign="center"
+    verticalAlign="top"
+    paddingLeft="0"
+    paddingRight="0"
+    paddingTop="0"
+    paddingBottom="0"
+    width="100%"
+    height="100%">
+<mx:Script>
+<![CDATA[
+    import com.pomodo.events.AccountCreateEvent;
+    import com.pomodo.events.LoginEvent;
+   
+
+    [Bindable]
+      private var _reviews:String =
+        '"pomodo, the hot new RIA by 38noises, is taking over ' +
+        'Web 2.0." --Michael Arrington*\n"I wish I\'d invested ' +
+        'in 38noises instead of that other company." --Jeff ' +
+        'Bezos*\n"38noises closed angel funding at a party in my ' +
+        'bathroom last night." --Om Malik*';
+
+
+    private function handleAccountCreate(e:AccountCreateEvent):
+    void {
+        showMain();
+    }
+
+    private function handleLogin(e:LoginEvent):void {
+        showMain();
+    }
+
+    private function showMain():void {
+        mainStack.selectedChild = mainBox;
+    }
+]]>
+</mx:Script>
+    <mx:ViewStack id="mainStack" width="100%" height="100%">
+ 
+    <mx:VBox id="splashBox" horizontalAlign="center"
+          verticalAlign="middle" width="100%" height="100%">
+            <mx:Image source="com/pomodo/assets/logo_md.png"/>
+
+      <mx:Label
+          text="The simple, GTD-style TODO list application."/>
+      <mx:Spacer height="10"/>
+      <mx:Text width="500" text="{_reviews}"/>
+      <mx:Spacer height="10"/>
+      <mx:Accordion width="400" height="300">
+      <pom:AccountCreateBox 
+              accountCreate="handleAccountCreate(event)"/>
+            <pom:LoginBox login="handleLogin(event)"/>
+      </mx:Accordion>
+      <mx:Label text="*did not say this, but might someday!"/>
+    </mx:VBox>
+    <pom:MainBox id="mainBox"/>
+
+</mx:ViewStack>
+</mx:Application>
